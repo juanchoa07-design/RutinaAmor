@@ -6,7 +6,7 @@
   const STORAGE_KEY = "rutinaAmor:v1";
   const TITLE_KEY = "rutinaAmor:title";
   // Subir este número reemplaza la rutina guardada por la nueva defaultRoutine (los checks y pesos se conservan por id).
-  const ROUTINE_VERSION = 4;
+  const ROUTINE_VERSION = 5;
   const PROGRAM_WEEKS = 6;
   const TRAINING_DAYS = ["martes", "miercoles", "viernes"];
   const DAY_MS = 24 * 60 * 60 * 1000;
@@ -57,7 +57,7 @@
         ex("mie-hombros", "Press de hombros en máquina", 3, "12"),
         ex("mie-biceps", "Curl de bíceps en polea", 3, "12"),
         ex("mie-triceps", "Tríceps en polea", 3, "12", "Con soga o barra"),
-        ex("mie-lenador", "Leñador en polea", 3, "12 por lado", "Oblicuos")
+        ex("mie-laterales", "Elevaciones laterales", 3, "12", "Con mancuernas")
       ],
       jueves: [],
       viernes: [

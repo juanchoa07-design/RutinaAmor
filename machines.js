@@ -200,16 +200,14 @@
         <path class="p" d="M58 32 L58 28"/>
         <circle class="ph" cx="65" cy="33" r="5"/>`
     },
-    lenador: {
-      tip: "De costado a la polea alta, brazos estirados. Llevá el agarre en diagonal hacia la rodilla contraria girando el torso, y volvé lento. Hacé las series de los dos lados.",
+    laterales: {
+      tip: "Parada con una mancuerna en cada mano y los codos apenas doblados. Subí los brazos hacia los costados hasta la altura de los hombros y bajá lento.",
       art: `
-        ${tower(90)}
-        <circle class="m" cx="90" cy="12" r="3"/>
-        <line class="c" x1="88" y1="12" x2="36" y2="62"/>
-        <path class="p" d="M52 24 L50 52 L40 82 M50 52 L62 82"/>
-        <path class="p" d="M52 30 L42 46 L36 62 M52 30 L46 48 L38 62"/>
-        <circle class="w" cx="36" cy="63" r="3"/>
-        <circle class="ph" cx="53" cy="17" r="5"/>`
+        <path class="p" d="M60 24 L60 54 L52 82 M60 54 L68 82"/>
+        <path class="p" d="M32 34 L54 30 L66 30 L88 34"/>
+        <rect class="w" x="26" y="28" width="6" height="13" rx="2"/>
+        <rect class="w" x="88" y="28" width="6" height="13" rx="2"/>
+        <circle class="ph" cx="60" cy="18" r="5"/>`
     },
     cinta: {
       bodyweight: true,
@@ -290,7 +288,7 @@
 
   const KEYWORDS = [
     ["crunch", "crunch"],
-    ["lenador", "lenador"],
+    ["lateral", "laterales"],
     ["elevacion de piernas", "elevacion"],
     ["prensa", "prensa"],
     ["extension de cuadriceps", "extension"],
