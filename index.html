@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi Rutina</title>
+<meta name="theme-color" content="#c084fc">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="header">
+    <h1 id="appTitle" class="app-title" contenteditable="true" spellcheck="false">Mi Rutina 💪</h1>
+    <p class="subtitle" id="dateLabel"></p>
+  </header>
+
+  <nav class="day-tabs" id="dayTabs"></nav>
+
+  <main class="content">
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <span class="progress-text" id="progressText">0/0</span>
+    </div>
+
+    <ul class="exercise-list" id="exerciseList"></ul>
+
+    <button class="btn-add" id="addExerciseBtn">+ Agregar ejercicio</button>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">Agregar ejercicio</h2>
+    <label>Nombre</label>
+    <input type="text" id="inputName" placeholder="Ej: Sentadillas">
+    <div class="modal-row">
+      <div>
+        <label>Series</label>
+        <input type="number" id="inputSets" min="0" placeholder="3">
+      </div>
+      <div>
+        <label>Repeticiones</label>
+        <input type="text" id="inputReps" placeholder="12 o 30 seg">
+      </div>
+    </div>
+    <label>Notas (opcional)</label>
+    <input type="text" id="inputNotes" placeholder="Peso, indicaciones...">
+    <div class="modal-actions">
+      <button class="btn-secondary" id="modalCancel">Cancelar</button>
+      <button class="btn-primary" id="modalSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

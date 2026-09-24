@@ -1,0 +1,11 @@
+{
+  "name": "Mi Rutina",
+  "short_name": "Rutina",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#fdf2f8",
+  "theme_color": "#c084fc",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
