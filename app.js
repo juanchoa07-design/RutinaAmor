@@ -1,8 +1,15 @@
 (function () {
   "use strict";
 
+  const { findMachine, machineSvg } = window.RutinaMachines;
+
   const STORAGE_KEY = "rutinaAmor:v1";
   const TITLE_KEY = "rutinaAmor:title";
+  // Subir este número reemplaza la rutina guardada por la nueva defaultRoutine (los checks y pesos se conservan por id).
+  const ROUTINE_VERSION = 3;
+  const PROGRAM_WEEKS = 6;
+  const TRAINING_DAYS = ["martes", "miercoles", "viernes"];
+  const DAY_MS = 24 * 60 * 60 * 1000;
 
   const DAY_ORDER = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"];
   const DAY_LABELS = {
@@ -18,84 +25,68 @@
     return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
   }
 
+  function ex(id, name, sets, reps, notes, warmup) {
+    return { id, name, sets, reps, notes: notes || "", warmup: !!warmup };
+  }
+
+  function absWarmup(day) {
+    return [
+      ex(day + "-crunch", "Crunch abdominal", 2, "15", "", true),
+      ex(day + "-elevacion", "Elevación de piernas", 2, "12", "", true)
+    ];
+  }
+
   function defaultRoutine() {
-    // 3 días por semana con máquinas de gimnasio: martes pierna, miércoles tren superior, viernes full body.
     return {
       lunes: [],
       martes: [
-        { id: uid(), name: "Prensa de piernas", sets: 4, reps: "12", notes: "Pies al ancho de hombros" },
-        { id: uid(), name: "Extensión de cuádriceps", sets: 3, reps: "12", notes: "" },
-        { id: uid(), name: "Curl femoral", sets: 3, reps: "12", notes: "Acostada o sentada" },
-        { id: uid(), name: "Hip thrust en máquina", sets: 4, reps: "12", notes: "Apretar glúteos arriba" },
-        { id: uid(), name: "Abductora", sets: 3, reps: "15", notes: "" },
-        { id: uid(), name: "Aductora", sets: 3, reps: "15", notes: "" },
-        { id: uid(), name: "Pantorrillas en máquina", sets: 3, reps: "15", notes: "" }
+        ...absWarmup("mar"),
+        ex("mar-prensa", "Prensa de piernas", 4, "12", "Pies al ancho de hombros"),
+        ex("mar-extension", "Extensión de cuádriceps", 3, "12"),
+        ex("mar-femoral", "Curl femoral", 3, "12", "Acostada o sentada"),
+        ex("mar-hipthrust", "Hip thrust en máquina", 4, "12", "Apretar glúteos arriba"),
+        ex("mar-abductora", "Abductora", 3, "15"),
+        ex("mar-aductora", "Aductora", 3, "15"),
+        ex("mar-pantorrillas", "Pantorrillas en máquina", 3, "15")
       ],
       miercoles: [
-        { id: uid(), name: "Jalón al pecho", sets: 3, reps: "12", notes: "Polea alta, agarre ancho" },
-        { id: uid(), name: "Remo sentado en máquina", sets: 3, reps: "12", notes: "" },
-        { id: uid(), name: "Press de pecho en máquina", sets: 3, reps: "12", notes: "" },
-        { id: uid(), name: "Press de hombros en máquina", sets: 3, reps: "12", notes: "" },
-        { id: uid(), name: "Curl de bíceps en polea", sets: 3, reps: "12", notes: "" },
-        { id: uid(), name: "Tríceps en polea", sets: 3, reps: "12", notes: "Con soga o barra" },
-        { id: uid(), name: "Abdominales en máquina", sets: 3, reps: "15", notes: "" }
+        ...absWarmup("mie"),
+        ex("mie-jalon", "Jalón al pecho", 3, "12", "Polea alta, agarre ancho"),
+        ex("mie-remo", "Remo sentado en máquina", 3, "12"),
+        ex("mie-pecho", "Press de pecho en máquina", 3, "12"),
+        ex("mie-hombros", "Press de hombros en máquina", 3, "12"),
+        ex("mie-biceps", "Curl de bíceps en polea", 3, "12"),
+        ex("mie-triceps", "Tríceps en polea", 3, "12", "Con soga o barra"),
+        ex("mie-abdominales", "Abdominales en máquina", 3, "15")
       ],
       jueves: [],
       viernes: [
-        { id: uid(), name: "Cinta o elíptica", sets: 1, reps: "10 min", notes: "Entrada en calor" },
-        { id: uid(), name: "Sentadilla en Smith", sets: 3, reps: "12", notes: "O prensa si no hay Smith" },
-        { id: uid(), name: "Patada de glúteo en polea", sets: 3, reps: "12 por pierna", notes: "" },
-        { id: uid(), name: "Jalón al pecho", sets: 3, reps: "12", notes: "" },
-        { id: uid(), name: "Press de pecho en máquina", sets: 3, reps: "12", notes: "" },
-        { id: uid(), name: "Remo sentado en máquina", sets: 3, reps: "12", notes: "" },
-        { id: uid(), name: "Plancha", sets: 3, reps: "30 seg", notes: "" }
+        ex("vie-cinta", "Cinta o elíptica", 1, "10 min", "", true),
+        ...absWarmup("vie"),
+        ex("vie-smith", "Sentadilla en Smith", 3, "12", "O prensa si no hay Smith"),
+        ex("vie-patada", "Patada de glúteo en polea", 3, "12 por pierna"),
+        ex("vie-jalon", "Jalón al pecho", 3, "12"),
+        ex("vie-pecho", "Press de pecho en máquina", 3, "12"),
+        ex("vie-remo", "Remo sentado en máquina", 3, "12"),
+        ex("vie-plancha", "Plancha", 3, "30 seg")
       ],
       sabado: [],
       domingo: []
     };
   }
 
-  // Subir este número reemplaza la rutina guardada por la nueva defaultRoutine (se conservan los checks).
-  const ROUTINE_VERSION = 2;
-
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.routine && parsed.completions) {
-          if (parsed.routineVersion !== ROUTINE_VERSION) {
-            parsed.routine = defaultRoutine();
-            parsed.routineVersion = ROUTINE_VERSION;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-          }
-          return parsed;
-        }
-      }
-    } catch (e) {}
-    return { routine: defaultRoutine(), completions: {}, routineVersion: ROUTINE_VERSION };
-  }
-
-  function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }
-
-  let state = loadState();
-
   // ---- fechas ----
-  function startOfWeek(d) {
+  function mondayOf(d) {
     const date = new Date(d);
-    const day = (date.getDay() + 6) % 7; // lunes = 0
-    date.setDate(date.getDate() - day);
+    date.setDate(date.getDate() - (date.getDay() + 6) % 7);
     date.setHours(0, 0, 0, 0);
     return date;
   }
 
-  function dateForDayIndex(idx) {
-    const monday = startOfWeek(new Date());
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + idx);
-    return d;
+  function addDays(d, n) {
+    const r = new Date(d);
+    r.setDate(r.getDate() + n);
+    return r;
   }
 
   function isoDate(d) {
@@ -105,61 +96,146 @@
     return `${y}-${m}-${day}`;
   }
 
-  function todayIndex() {
-    return (new Date().getDay() + 6) % 7;
+  function parseISO(s) {
+    const [y, m, d] = s.split("-").map(Number);
+    return new Date(y, m - 1, d);
   }
 
-  let selectedIndex = todayIndex();
-
-  // ---- helpers de estado ----
-  function getDayKey(idx) {
-    return DAY_ORDER[idx];
+  function shortDate(d) {
+    return d.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
   }
 
-  function getDateKey(idx) {
-    return isoDate(dateForDayIndex(idx));
+  // ---- estado ----
+  function loadState() {
+    let s = null;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) s = JSON.parse(raw);
+    } catch (e) {}
+    if (!s || typeof s !== "object") s = {};
+    if (!s.completions) s.completions = {};
+    if (!s.routine || s.routineVersion !== ROUTINE_VERSION) {
+      s.routine = defaultRoutine();
+      s.routineVersion = ROUTINE_VERSION;
+    }
+    if (!s.weights) s.weights = {};
+    if (!s.programStart) s.programStart = isoDate(mondayOf(new Date()));
+    return s;
   }
 
-  function isExerciseDone(dateKey, exId) {
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  const state = loadState();
+  saveState();
+
+  function weekOfDate(d) {
+    return Math.round((mondayOf(d) - parseISO(state.programStart)) / (7 * DAY_MS)) + 1;
+  }
+
+  function dateFor(week, idx) {
+    return addDays(parseISO(state.programStart), (week - 1) * 7 + idx);
+  }
+
+  const todayKey = isoDate(new Date());
+  const todayIdx = (new Date().getDay() + 6) % 7;
+  const thisWeek = weekOfDate(new Date());
+
+  let selectedWeek = Math.min(Math.max(thisWeek, 1), PROGRAM_WEEKS);
+  let selectedIndex = selectedWeek === thisWeek ? todayIdx : DAY_ORDER.indexOf(TRAINING_DAYS[0]);
+
+  function isDone(dateKey, exId) {
     return !!(state.completions[dateKey] && state.completions[dateKey][exId]);
   }
 
   function toggleExercise(dateKey, exId) {
-    if (!state.completions[dateKey]) state.completions[dateKey] = {};
-    state.completions[dateKey][exId] = !state.completions[dateKey][exId];
-    if (!state.completions[dateKey][exId]) delete state.completions[dateKey][exId];
+    const day = state.completions[dateKey] || (state.completions[dateKey] = {});
+    if (day[exId]) delete day[exId]; else day[exId] = true;
+    if (Object.keys(day).length === 0) delete state.completions[dateKey];
     saveState();
     render();
   }
 
-  function dayCompletion(idx) {
-    const dayKey = getDayKey(idx);
-    const list = state.routine[dayKey] || [];
-    if (list.length === 0) return null; // descanso
-    const dateKey = getDateKey(idx);
-    const done = list.filter(ex => isExerciseDone(dateKey, ex.id)).length;
+  function getWeight(dateKey, exId) {
+    return (state.weights[dateKey] && state.weights[dateKey][exId]) || "";
+  }
+
+  function setWeight(dateKey, exId, value) {
+    const v = value.trim();
+    if (v) {
+      (state.weights[dateKey] || (state.weights[dateKey] = {}))[exId] = v;
+    } else if (state.weights[dateKey]) {
+      delete state.weights[dateKey][exId];
+      if (Object.keys(state.weights[dateKey]).length === 0) delete state.weights[dateKey];
+    }
+    saveState();
+  }
+
+  function sameName(a, b) {
+    return a.trim().toLowerCase() === b.trim().toLowerCase();
+  }
+
+  // Historial por nombre, así "Jalón al pecho" del miércoles y del viernes comparten registro.
+  function weightHistory(name) {
+    const names = {};
+    DAY_ORDER.forEach(d => (state.routine[d] || []).forEach(e => { names[e.id] = e.name; }));
+    const out = [];
+    Object.keys(state.weights).sort().forEach(date => {
+      Object.entries(state.weights[date]).forEach(([id, kg]) => {
+        if (names[id] && sameName(names[id], name)) out.push({ date, kg });
+      });
+    });
+    return out;
+  }
+
+  function sessionStatus(week, idx) {
+    const list = state.routine[DAY_ORDER[idx]] || [];
+    if (list.length === 0) return null;
+    const dateKey = isoDate(dateFor(week, idx));
+    const done = list.filter(e => isDone(dateKey, e.id)).length;
     return { done, total: list.length };
   }
 
-  // ---- DOM refs ----
-  const dayTabsEl = document.getElementById("dayTabs");
-  const dateLabelEl = document.getElementById("dateLabel");
-  const exerciseListEl = document.getElementById("exerciseList");
-  const progressFillEl = document.getElementById("progressFill");
-  const progressTextEl = document.getElementById("progressText");
-  const addExerciseBtn = document.getElementById("addExerciseBtn");
-  const appTitleEl = document.getElementById("appTitle");
+  function statusClass(st) {
+    if (!st || st.done === 0) return "";
+    return st.done === st.total ? "done" : "partial";
+  }
 
-  const modalOverlay = document.getElementById("modalOverlay");
-  const modalTitle = document.getElementById("modalTitle");
-  const inputName = document.getElementById("inputName");
-  const inputSets = document.getElementById("inputSets");
-  const inputReps = document.getElementById("inputReps");
-  const inputNotes = document.getElementById("inputNotes");
-  const modalCancel = document.getElementById("modalCancel");
-  const modalSave = document.getElementById("modalSave");
+  // ---- DOM ----
+  const $ = id => document.getElementById(id);
+  const appTitleEl = $("appTitle");
+  const weekLabelEl = $("weekLabel");
+  const weekRangeEl = $("weekRange");
+  const prevWeekBtn = $("prevWeek");
+  const nextWeekBtn = $("nextWeek");
+  const programGridEl = $("programGrid");
+  const programTextEl = $("programText");
+  const dayTabsEl = $("dayTabs");
+  const dateLabelEl = $("dateLabel");
+  const progressWrapEl = $("progressWrap");
+  const progressFillEl = $("progressFill");
+  const progressTextEl = $("progressText");
+  const exerciseListEl = $("exerciseList");
+  const addExerciseBtn = $("addExerciseBtn");
 
-  let editingExerciseId = null;
+  const modalOverlay = $("modalOverlay");
+  const modalTitle = $("modalTitle");
+  const inputName = $("inputName");
+  const inputSets = $("inputSets");
+  const inputReps = $("inputReps");
+  const inputNotes = $("inputNotes");
+
+  const detailOverlay = $("detailOverlay");
+  const detailArt = $("detailArt");
+  const detailName = $("detailName");
+  const detailMeta = $("detailMeta");
+  const detailTip = $("detailTip");
+  const detailNotes = $("detailNotes");
+  const detailHistory = $("detailHistory");
+
+  let editing = null;   // { dayKey, id|null }
+  let detailing = null; // { dayKey, ex }
 
   // ---- título editable ----
   const savedTitle = localStorage.getItem(TITLE_KEY);
@@ -169,183 +245,296 @@
     appTitleEl.textContent = text;
     localStorage.setItem(TITLE_KEY, text);
   });
-  appTitleEl.addEventListener("keydown", (e) => {
+  appTitleEl.addEventListener("keydown", e => {
     if (e.key === "Enter") { e.preventDefault(); appTitleEl.blur(); }
   });
 
   // ---- render ----
   function render() {
+    renderWeekNav();
+    renderProgram();
     renderTabs();
-    renderDateLabel();
-    renderExercises();
+    renderDay();
+  }
+
+  function renderWeekNav() {
+    weekLabelEl.textContent = `Semana ${selectedWeek} de ${PROGRAM_WEEKS}`;
+    weekRangeEl.textContent = `${shortDate(dateFor(selectedWeek, 0))} – ${shortDate(dateFor(selectedWeek, 6))}`;
+    prevWeekBtn.disabled = selectedWeek <= 1;
+    nextWeekBtn.disabled = selectedWeek >= PROGRAM_WEEKS;
+  }
+
+  function renderProgram() {
+    programGridEl.innerHTML = "";
+    let completed = 0;
+    let total = 0;
+    for (let w = 1; w <= PROGRAM_WEEKS; w++) {
+      const col = document.createElement("button");
+      col.className = "program-week" + (w === selectedWeek ? " selected" : "") + (w === thisWeek ? " current" : "");
+      col.setAttribute("aria-label", `Semana ${w}`);
+      const label = document.createElement("span");
+      label.className = "program-week-label";
+      label.textContent = "S" + w;
+      col.appendChild(label);
+      const dots = document.createElement("span");
+      dots.className = "program-dots";
+      DAY_ORDER.forEach((_, idx) => {
+        const st = sessionStatus(w, idx);
+        if (!st) return;
+        total++;
+        if (st.done === st.total) completed++;
+        const dot = document.createElement("span");
+        dot.className = "day-dot " + statusClass(st);
+        dots.appendChild(dot);
+      });
+      col.appendChild(dots);
+      col.addEventListener("click", () => selectWeek(w));
+      programGridEl.appendChild(col);
+    }
+    programTextEl.textContent = `${completed} de ${total} entrenamientos completos`;
   }
 
   function renderTabs() {
     dayTabsEl.innerHTML = "";
-    const tIdx = todayIndex();
     DAY_ORDER.forEach((dayKey, idx) => {
+      const d = dateFor(selectedWeek, idx);
       const btn = document.createElement("button");
-      btn.className = "day-tab" + (idx === selectedIndex ? " selected" : "") + (idx === tIdx ? " today" : "");
+      btn.className = "day-tab" + (idx === selectedIndex ? " selected" : "") + (isoDate(d) === todayKey ? " today" : "");
       const label = document.createElement("span");
       label.textContent = DAY_LABELS[dayKey];
       btn.appendChild(label);
-
+      const num = document.createElement("span");
+      num.className = "day-num";
+      num.textContent = d.getDate();
+      btn.appendChild(num);
       const dot = document.createElement("span");
-      const comp = dayCompletion(idx);
-      dot.className = "day-dot";
-      if (comp) {
-        if (comp.done === comp.total) dot.classList.add("done");
-        else if (comp.done > 0) dot.classList.add("partial");
-      }
+      dot.className = "day-dot " + statusClass(sessionStatus(selectedWeek, idx));
       btn.appendChild(dot);
-
-      btn.addEventListener("click", () => {
-        selectedIndex = idx;
-        render();
-      });
+      btn.addEventListener("click", () => { selectedIndex = idx; render(); });
       dayTabsEl.appendChild(btn);
     });
   }
 
-  function renderDateLabel() {
-    const d = dateForDayIndex(selectedIndex);
-    const opts = { day: "numeric", month: "long" };
-    dateLabelEl.textContent = `${DAY_FULL[getDayKey(selectedIndex)]} ${d.toLocaleDateString("es-ES", opts)}`;
-  }
-
-  function renderExercises() {
-    const dayKey = getDayKey(selectedIndex);
-    const dateKey = getDateKey(selectedIndex);
+  function renderDay() {
+    const dayKey = DAY_ORDER[selectedIndex];
+    const d = dateFor(selectedWeek, selectedIndex);
+    const dateKey = isoDate(d);
     const list = state.routine[dayKey] || [];
 
+    dateLabelEl.textContent = `${DAY_FULL[dayKey]} ${d.toLocaleDateString("es-ES", { day: "numeric", month: "long" })}`;
     exerciseListEl.innerHTML = "";
+    addExerciseBtn.hidden = !TRAINING_DAYS.includes(dayKey);
 
     if (list.length === 0) {
+      progressWrapEl.hidden = true;
       const rest = document.createElement("li");
       rest.className = "rest-card";
       rest.textContent = "😴 Día de descanso";
       exerciseListEl.appendChild(rest);
-      progressFillEl.style.width = "0%";
-      progressTextEl.textContent = "";
       return;
     }
+    progressWrapEl.hidden = false;
 
     let doneCount = 0;
-
-    list.forEach(ex => {
-      const done = isExerciseDone(dateKey, ex.id);
-      if (done) doneCount++;
-
-      const li = document.createElement("li");
-      li.className = "exercise-card" + (done ? " done" : "");
-
-      const check = document.createElement("button");
-      check.className = "exercise-check" + (done ? " checked" : "");
-      check.textContent = done ? "✓" : "";
-      check.addEventListener("click", () => toggleExercise(dateKey, ex.id));
-      li.appendChild(check);
-
-      const info = document.createElement("div");
-      info.className = "exercise-info";
-
-      const name = document.createElement("p");
-      name.className = "exercise-name" + (done ? " done" : "");
-      name.textContent = ex.name;
-      info.appendChild(name);
-
-      const meta = document.createElement("p");
-      meta.className = "exercise-meta";
-      const parts = [];
-      if (ex.sets) parts.push(`${ex.sets} series`);
-      if (ex.reps) parts.push(`${ex.reps} reps`);
-      meta.textContent = parts.join(" · ");
-      info.appendChild(meta);
-
-      if (ex.notes) {
-        const notes = document.createElement("p");
-        notes.className = "exercise-notes";
-        notes.textContent = ex.notes;
-        info.appendChild(notes);
+    let lastSection = null;
+    list.forEach(e => {
+      const section = e.warmup ? "Calentamiento" : "Rutina";
+      if (section !== lastSection) {
+        const h = document.createElement("li");
+        h.className = "section-title";
+        h.textContent = section;
+        exerciseListEl.appendChild(h);
+        lastSection = section;
       }
-
-      li.appendChild(info);
-
-      const actions = document.createElement("div");
-      actions.className = "exercise-actions";
-
-      const editBtn = document.createElement("button");
-      editBtn.className = "icon-btn";
-      editBtn.textContent = "✏️";
-      editBtn.addEventListener("click", () => openModal(dayKey, ex));
-      actions.appendChild(editBtn);
-
-      const delBtn = document.createElement("button");
-      delBtn.className = "icon-btn";
-      delBtn.textContent = "🗑️";
-      delBtn.addEventListener("click", () => {
-        if (confirm(`¿Eliminar "${ex.name}"?`)) {
-          state.routine[dayKey] = state.routine[dayKey].filter(e => e.id !== ex.id);
-          saveState();
-          render();
-        }
-      });
-      actions.appendChild(delBtn);
-
-      li.appendChild(actions);
-      exerciseListEl.appendChild(li);
+      const done = isDone(dateKey, e.id);
+      if (done) doneCount++;
+      exerciseListEl.appendChild(exerciseCard(dayKey, dateKey, e, done));
     });
 
-    const pct = list.length ? Math.round((doneCount / list.length) * 100) : 0;
-    progressFillEl.style.width = pct + "%";
+    progressFillEl.style.width = Math.round((doneCount / list.length) * 100) + "%";
     progressTextEl.textContent = `${doneCount}/${list.length}`;
   }
 
+  function exerciseCard(dayKey, dateKey, e, done) {
+    const machine = findMachine(e.name);
+    const li = document.createElement("li");
+    li.className = "exercise-card" + (done ? " done" : "");
+
+    const check = document.createElement("button");
+    check.className = "exercise-check" + (done ? " checked" : "");
+    check.textContent = done ? "✓" : "";
+    check.setAttribute("aria-label", done ? "Desmarcar" : "Marcar como hecho");
+    check.addEventListener("click", () => toggleExercise(dateKey, e.id));
+    li.appendChild(check);
+
+    const thumb = document.createElement("button");
+    thumb.className = "exercise-thumb";
+    thumb.innerHTML = machineSvg(machine);
+    thumb.setAttribute("aria-label", "Ver cómo se hace");
+    thumb.addEventListener("click", () => openDetail(dayKey, e));
+    li.appendChild(thumb);
+
+    const info = document.createElement("div");
+    info.className = "exercise-info";
+
+    const name = document.createElement("button");
+    name.className = "exercise-name";
+    name.textContent = e.name;
+    name.addEventListener("click", () => openDetail(dayKey, e));
+    info.appendChild(name);
+
+    const meta = document.createElement("p");
+    meta.className = "exercise-meta";
+    const parts = [];
+    if (e.sets) parts.push(`${e.sets} series`);
+    if (e.reps) parts.push(`${e.reps} reps`);
+    meta.textContent = parts.join(" · ");
+    info.appendChild(meta);
+
+    if (e.notes) {
+      const notes = document.createElement("p");
+      notes.className = "exercise-notes";
+      notes.textContent = e.notes;
+      info.appendChild(notes);
+    }
+
+    if (!machine.bodyweight) info.appendChild(weightRow(dateKey, e));
+
+    li.appendChild(info);
+    return li;
+  }
+
+  function weightRow(dateKey, e) {
+    const row = document.createElement("div");
+    row.className = "weight-row";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.inputMode = "decimal";
+    input.className = "weight-input";
+    input.placeholder = "Peso";
+    input.value = getWeight(dateKey, e.id);
+    input.addEventListener("input", () => setWeight(dateKey, e.id, input.value));
+    input.addEventListener("change", () => renderProgram());
+    row.appendChild(input);
+
+    const unit = document.createElement("span");
+    unit.className = "weight-unit";
+    unit.textContent = "kg";
+    row.appendChild(unit);
+
+    const prev = weightHistory(e.name).filter(h => h.date < dateKey).pop();
+    if (prev) {
+      const hint = document.createElement("span");
+      hint.className = "weight-prev";
+      hint.textContent = `Anterior: ${prev.kg} kg`;
+      row.appendChild(hint);
+    }
+    return row;
+  }
+
+  function selectWeek(w) {
+    selectedWeek = w;
+    render();
+  }
+
+  prevWeekBtn.addEventListener("click", () => selectWeek(selectedWeek - 1));
+  nextWeekBtn.addEventListener("click", () => selectWeek(selectedWeek + 1));
+
+  // ---- detalle ----
+  function openDetail(dayKey, e) {
+    detailing = { dayKey, ex: e };
+    const machine = findMachine(e.name);
+    detailArt.innerHTML = machineSvg(machine);
+    detailName.textContent = e.name;
+    const parts = [];
+    if (e.sets) parts.push(`${e.sets} series`);
+    if (e.reps) parts.push(`${e.reps} reps`);
+    detailMeta.textContent = parts.join(" · ");
+    detailTip.textContent = machine.tip;
+    detailTip.hidden = !machine.tip;
+    detailNotes.textContent = e.notes;
+    detailNotes.hidden = !e.notes;
+
+    detailHistory.innerHTML = "";
+    const history = machine.bodyweight ? [] : weightHistory(e.name);
+    if (history.length) {
+      const title = document.createElement("p");
+      title.className = "history-title";
+      title.textContent = "Pesos anotados";
+      detailHistory.appendChild(title);
+      history.slice(-8).reverse().forEach(h => {
+        const row = document.createElement("div");
+        row.className = "history-row";
+        const dt = document.createElement("span");
+        dt.textContent = parseISO(h.date).toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" });
+        const kg = document.createElement("strong");
+        kg.textContent = `${h.kg} kg`;
+        row.append(dt, kg);
+        detailHistory.appendChild(row);
+      });
+    }
+    detailOverlay.classList.add("open");
+  }
+
+  function closeDetail() {
+    detailOverlay.classList.remove("open");
+    detailing = null;
+  }
+
+  $("detailClose").addEventListener("click", closeDetail);
+  detailOverlay.addEventListener("click", e => { if (e.target === detailOverlay) closeDetail(); });
+
+  $("detailEdit").addEventListener("click", () => {
+    const { dayKey, ex: e } = detailing;
+    closeDetail();
+    openModal(dayKey, e);
+  });
+
+  $("detailDelete").addEventListener("click", () => {
+    const { dayKey, ex: e } = detailing;
+    if (!confirm(`¿Eliminar "${e.name}"?`)) return;
+    state.routine[dayKey] = state.routine[dayKey].filter(x => x.id !== e.id);
+    saveState();
+    closeDetail();
+    render();
+  });
+
   // ---- modal agregar/editar ----
-  function openModal(dayKey, exercise) {
-    editingExerciseId = exercise ? exercise.id : null;
-    modalTitle.textContent = exercise ? "Editar ejercicio" : "Agregar ejercicio";
-    inputName.value = exercise ? exercise.name : "";
-    inputSets.value = exercise ? exercise.sets : "";
-    inputReps.value = exercise ? exercise.reps : "";
-    inputNotes.value = exercise ? exercise.notes : "";
+  function openModal(dayKey, e) {
+    editing = { dayKey, id: e ? e.id : null };
+    modalTitle.textContent = e ? "Editar ejercicio" : "Agregar ejercicio";
+    inputName.value = e ? e.name : "";
+    inputSets.value = e ? e.sets : "";
+    inputReps.value = e ? e.reps : "";
+    inputNotes.value = e ? e.notes : "";
     modalOverlay.classList.add("open");
-    modalOverlay.dataset.dayKey = dayKey;
     setTimeout(() => inputName.focus(), 50);
   }
 
   function closeModal() {
     modalOverlay.classList.remove("open");
-    editingExerciseId = null;
+    editing = null;
   }
 
-  addExerciseBtn.addEventListener("click", () => {
-    openModal(getDayKey(selectedIndex), null);
-  });
+  addExerciseBtn.addEventListener("click", () => openModal(DAY_ORDER[selectedIndex], null));
+  $("modalCancel").addEventListener("click", closeModal);
+  modalOverlay.addEventListener("click", e => { if (e.target === modalOverlay) closeModal(); });
 
-  modalCancel.addEventListener("click", closeModal);
-  modalOverlay.addEventListener("click", (e) => {
-    if (e.target === modalOverlay) closeModal();
-  });
-
-  modalSave.addEventListener("click", () => {
+  $("modalSave").addEventListener("click", () => {
     const name = inputName.value.trim();
     if (!name) { inputName.focus(); return; }
-    const dayKey = modalOverlay.dataset.dayKey;
-    const sets = inputSets.value.trim();
-    const reps = inputReps.value.trim();
-    const notes = inputNotes.value.trim();
-
-    if (editingExerciseId) {
-      const ex = state.routine[dayKey].find(e => e.id === editingExerciseId);
-      if (ex) {
-        ex.name = name;
-        ex.sets = sets;
-        ex.reps = reps;
-        ex.notes = notes;
-      }
+    const fields = {
+      name,
+      sets: inputSets.value.trim(),
+      reps: inputReps.value.trim(),
+      notes: inputNotes.value.trim()
+    };
+    const list = state.routine[editing.dayKey] || (state.routine[editing.dayKey] = []);
+    if (editing.id) {
+      Object.assign(list.find(x => x.id === editing.id), fields);
     } else {
-      if (!state.routine[dayKey]) state.routine[dayKey] = [];
-      state.routine[dayKey].push({ id: uid(), name, sets, reps, notes });
+      list.push({ id: uid(), warmup: false, ...fields });
     }
     saveState();
     closeModal();

@@ -17,13 +17,27 @@
 
   <header class="header">
     <h1 id="appTitle" class="app-title" contenteditable="true" spellcheck="false">Mi Rutina 💪</h1>
-    <p class="subtitle" id="dateLabel"></p>
   </header>
+
+  <section class="program">
+    <div class="week-nav">
+      <button class="week-arrow" id="prevWeek" aria-label="Semana anterior">‹</button>
+      <div class="week-info">
+        <strong id="weekLabel"></strong>
+        <span id="weekRange"></span>
+      </div>
+      <button class="week-arrow" id="nextWeek" aria-label="Semana siguiente">›</button>
+    </div>
+    <div class="program-grid" id="programGrid"></div>
+    <p class="program-text" id="programText"></p>
+  </section>
 
   <nav class="day-tabs" id="dayTabs"></nav>
 
   <main class="content">
-    <div class="progress-wrap">
+    <p class="date-label" id="dateLabel"></p>
+
+    <div class="progress-wrap" id="progressWrap">
       <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
       <span class="progress-text" id="progressText">0/0</span>
     </div>
@@ -34,23 +48,39 @@
   </main>
 </div>
 
+<div class="modal-overlay" id="detailOverlay">
+  <div class="modal">
+    <div class="detail-art" id="detailArt"></div>
+    <h2 id="detailName"></h2>
+    <p class="detail-meta" id="detailMeta"></p>
+    <p class="detail-tip" id="detailTip"></p>
+    <p class="exercise-notes" id="detailNotes"></p>
+    <div class="detail-history" id="detailHistory"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="detailEdit">Editar</button>
+      <button class="btn-secondary btn-danger" id="detailDelete">Eliminar</button>
+      <button class="btn-primary" id="detailClose">Listo</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h2 id="modalTitle">Agregar ejercicio</h2>
-    <label>Nombre</label>
-    <input type="text" id="inputName" placeholder="Ej: Sentadillas">
+    <label for="inputName">Nombre</label>
+    <input type="text" id="inputName" placeholder="Ej: Prensa de piernas">
     <div class="modal-row">
       <div>
-        <label>Series</label>
+        <label for="inputSets">Series</label>
         <input type="number" id="inputSets" min="0" placeholder="3">
       </div>
       <div>
-        <label>Repeticiones</label>
+        <label for="inputReps">Repeticiones</label>
         <input type="text" id="inputReps" placeholder="12 o 30 seg">
       </div>
     </div>
-    <label>Notas (opcional)</label>
-    <input type="text" id="inputNotes" placeholder="Peso, indicaciones...">
+    <label for="inputNotes">Notas (opcional)</label>
+    <input type="text" id="inputNotes" placeholder="Indicaciones...">
     <div class="modal-actions">
       <button class="btn-secondary" id="modalCancel">Cancelar</button>
       <button class="btn-primary" id="modalSave">Guardar</button>
@@ -58,6 +88,7 @@
   </div>
 </div>
 
+<script src="machines.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
