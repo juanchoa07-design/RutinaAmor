@@ -19,9 +19,10 @@
   }
 
   function defaultRoutine() {
-    // 3 días por semana con máquinas de gimnasio: lunes pierna, miércoles tren superior, viernes full body.
+    // 3 días por semana con máquinas de gimnasio: martes pierna, miércoles tren superior, viernes full body.
     return {
-      lunes: [
+      lunes: [],
+      martes: [
         { id: uid(), name: "Prensa de piernas", sets: 4, reps: "12", notes: "Pies al ancho de hombros" },
         { id: uid(), name: "Extensión de cuádriceps", sets: 3, reps: "12", notes: "" },
         { id: uid(), name: "Curl femoral", sets: 3, reps: "12", notes: "Acostada o sentada" },
@@ -30,7 +31,6 @@
         { id: uid(), name: "Aductora", sets: 3, reps: "15", notes: "" },
         { id: uid(), name: "Pantorrillas en máquina", sets: 3, reps: "15", notes: "" }
       ],
-      martes: [],
       miercoles: [
         { id: uid(), name: "Jalón al pecho", sets: 3, reps: "12", notes: "Polea alta, agarre ancho" },
         { id: uid(), name: "Remo sentado en máquina", sets: 3, reps: "12", notes: "" },
@@ -55,15 +55,25 @@
     };
   }
 
+  // Subir este número reemplaza la rutina guardada por la nueva defaultRoutine (se conservan los checks).
+  const ROUTINE_VERSION = 2;
+
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed && parsed.routine && parsed.completions) return parsed;
+        if (parsed && parsed.routine && parsed.completions) {
+          if (parsed.routineVersion !== ROUTINE_VERSION) {
+            parsed.routine = defaultRoutine();
+            parsed.routineVersion = ROUTINE_VERSION;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+          }
+          return parsed;
+        }
       }
     } catch (e) {}
-    return { routine: defaultRoutine(), completions: {} };
+    return { routine: defaultRoutine(), completions: {}, routineVersion: ROUTINE_VERSION };
   }
 
   function saveState() {
