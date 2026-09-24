@@ -200,6 +200,17 @@
         <path class="p" d="M58 32 L58 28"/>
         <circle class="ph" cx="65" cy="33" r="5"/>`
     },
+    lenador: {
+      tip: "De costado a la polea alta, brazos estirados. Llevá el agarre en diagonal hacia la rodilla contraria girando el torso, y volvé lento. Hacé las series de los dos lados.",
+      art: `
+        ${tower(90)}
+        <circle class="m" cx="90" cy="12" r="3"/>
+        <line class="c" x1="88" y1="12" x2="36" y2="62"/>
+        <path class="p" d="M52 24 L50 52 L40 82 M50 52 L62 82"/>
+        <path class="p" d="M52 30 L42 46 L36 62 M52 30 L46 48 L38 62"/>
+        <circle class="w" cx="36" cy="63" r="3"/>
+        <circle class="ph" cx="53" cy="17" r="5"/>`
+    },
     cinta: {
       bodyweight: true,
       tip: "10 minutos a ritmo cómodo para entrar en calor. Podés subir un poco la inclinación o la velocidad a medida que avanza.",
@@ -279,6 +290,7 @@
 
   const KEYWORDS = [
     ["crunch", "crunch"],
+    ["lenador", "lenador"],
     ["elevacion de piernas", "elevacion"],
     ["prensa", "prensa"],
     ["extension de cuadriceps", "extension"],

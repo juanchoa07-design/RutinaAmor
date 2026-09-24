@@ -6,7 +6,7 @@
   const STORAGE_KEY = "rutinaAmor:v1";
   const TITLE_KEY = "rutinaAmor:title";
   // Subir este número reemplaza la rutina guardada por la nueva defaultRoutine (los checks y pesos se conservan por id).
-  const ROUTINE_VERSION = 3;
+  const ROUTINE_VERSION = 4;
   const PROGRAM_WEEKS = 6;
   const TRAINING_DAYS = ["martes", "miercoles", "viernes"];
   const DAY_MS = 24 * 60 * 60 * 1000;
@@ -57,18 +57,17 @@
         ex("mie-hombros", "Press de hombros en máquina", 3, "12"),
         ex("mie-biceps", "Curl de bíceps en polea", 3, "12"),
         ex("mie-triceps", "Tríceps en polea", 3, "12", "Con soga o barra"),
-        ex("mie-abdominales", "Abdominales en máquina", 3, "15")
+        ex("mie-lenador", "Leñador en polea", 3, "12 por lado", "Oblicuos")
       ],
       jueves: [],
       viernes: [
-        ex("vie-cinta", "Cinta o elíptica", 1, "10 min", "", true),
+        ex("vie-plancha", "Plancha", 3, "30 seg", "", true),
         ...absWarmup("vie"),
         ex("vie-smith", "Sentadilla en Smith", 3, "12", "O prensa si no hay Smith"),
         ex("vie-patada", "Patada de glúteo en polea", 3, "12 por pierna"),
         ex("vie-jalon", "Jalón al pecho", 3, "12"),
         ex("vie-pecho", "Press de pecho en máquina", 3, "12"),
-        ex("vie-remo", "Remo sentado en máquina", 3, "12"),
-        ex("vie-plancha", "Plancha", 3, "30 seg")
+        ex("vie-remo", "Remo sentado en máquina", 3, "12")
       ],
       sabado: [],
       domingo: []
@@ -385,10 +384,7 @@
 
     const meta = document.createElement("p");
     meta.className = "exercise-meta";
-    const parts = [];
-    if (e.sets) parts.push(`${e.sets} series`);
-    if (e.reps) parts.push(`${e.reps} reps`);
-    meta.textContent = parts.join(" · ");
+    meta.textContent = metaText(e);
     info.appendChild(meta);
 
     if (e.notes) {
@@ -402,6 +398,13 @@
 
     li.appendChild(info);
     return li;
+  }
+
+  function metaText(e) {
+    const parts = [];
+    if (e.sets) parts.push(`${e.sets} series`);
+    if (e.reps) parts.push(/^\d+$/.test(String(e.reps).trim()) ? `${e.reps} reps` : e.reps);
+    return parts.join(" · ");
   }
 
   function weightRow(dateKey, e) {
@@ -447,10 +450,7 @@
     const machine = findMachine(e.name);
     detailArt.innerHTML = machineSvg(machine);
     detailName.textContent = e.name;
-    const parts = [];
-    if (e.sets) parts.push(`${e.sets} series`);
-    if (e.reps) parts.push(`${e.reps} reps`);
-    detailMeta.textContent = parts.join(" · ");
+    detailMeta.textContent = metaText(e);
     detailTip.textContent = machine.tip;
     detailTip.hidden = !machine.tip;
     detailNotes.textContent = e.notes;
