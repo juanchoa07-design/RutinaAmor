@@ -200,6 +200,16 @@
         <path class="p" d="M58 32 L58 28"/>
         <circle class="ph" cx="65" cy="33" r="5"/>`
     },
+    martillo: {
+      tip: "Parada con una mancuerna en cada mano y las palmas mirando hacia el cuerpo. Subí doblando los codos sin despegarlos del costado y bajá lento.",
+      art: `
+        <path class="p" d="M50 22 L50 52 L46 82 M50 52 L56 82"/>
+        <path class="p" d="M50 28 L52 46 L62 34"/>
+        <line class="m" x1="63" y1="29" x2="63" y2="41"/>
+        <rect class="w" x="59" y="23" width="8" height="6" rx="1.5"/>
+        <rect class="w" x="59" y="40" width="8" height="6" rx="1.5"/>
+        <circle class="ph" cx="50" cy="15" r="5"/>`
+    },
     laterales: {
       tip: "Parada con una mancuerna en cada mano y los codos apenas doblados. Subí los brazos hacia los costados hasta la altura de los hombros y bajá lento.",
       art: `
@@ -289,6 +299,7 @@
   const KEYWORDS = [
     ["crunch", "crunch"],
     ["lateral", "laterales"],
+    ["martillo", "martillo"],
     ["elevacion de piernas", "elevacion"],
     ["prensa", "prensa"],
     ["extension de cuadriceps", "extension"],
