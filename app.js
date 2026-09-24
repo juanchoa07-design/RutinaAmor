@@ -6,7 +6,7 @@
   const STORAGE_KEY = "rutinaAmor:v1";
   const TITLE_KEY = "rutinaAmor:title";
   // Subir este número reemplaza la rutina guardada por la nueva defaultRoutine (los checks y pesos se conservan por id).
-  const ROUTINE_VERSION = 6;
+  const ROUTINE_VERSION = 7;
   const PROGRAM_WEEKS = 6;
   const TRAINING_DAYS = ["martes", "miercoles", "viernes"];
   const DAY_MS = 24 * 60 * 60 * 1000;
@@ -31,6 +31,7 @@
 
   function absWarmup(day) {
     return [
+      ex(day + "-plancha", "Plancha", 3, "30 seg", "", true),
       ex(day + "-crunch", "Crunch abdominal", 2, "15", "", true),
       ex(day + "-elevacion", "Elevación de piernas", 2, "12", "", true)
     ];
@@ -61,7 +62,6 @@
       ],
       jueves: [],
       viernes: [
-        ex("vie-plancha", "Plancha", 3, "30 seg", "", true),
         ...absWarmup("vie"),
         ex("vie-smith", "Sentadilla en Smith", 3, "12", "O prensa si no hay Smith"),
         ex("vie-patada", "Patada de glúteo en polea", 3, "12 por pierna"),
