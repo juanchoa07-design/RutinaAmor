@@ -494,3 +494,77 @@ button { font-family: inherit; color: inherit; }
 }
 
 .btn-danger { color: var(--danger); }
+
+/* ---- festejo al completar el día ---- */
+.celebrate-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(59, 7, 100, 0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  overflow: hidden;
+  padding: 16px;
+}
+
+.celebrate-overlay.open { display: flex; }
+
+.celebrate-card {
+  position: relative;
+  background: white;
+  border-radius: 28px;
+  padding: 28px 24px 22px;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(168, 85, 247, 0.35);
+  animation: popIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.celebrate-card .btn-primary { width: 100%; }
+
+.celebrate-heart {
+  font-size: 4rem;
+  line-height: 1;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.celebrate-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 14px 0 20px;
+  line-height: 1.3;
+  background: linear-gradient(135deg, var(--primary-dark), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hearts { position: absolute; inset: 0; pointer-events: none; }
+
+.hearts span {
+  position: absolute;
+  bottom: -40px;
+  animation: floatUp linear forwards;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+@keyframes floatUp {
+  from { transform: translateY(0) rotate(0deg); opacity: 1; }
+  to { transform: translateY(-110vh) rotate(25deg); opacity: 0.2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .celebrate-card, .celebrate-heart, .hearts span { animation: none; }
+  .hearts { display: none; }
+}

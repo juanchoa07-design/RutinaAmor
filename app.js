@@ -148,13 +148,35 @@
     return !!(state.completions[dateKey] && state.completions[dateKey][exId]);
   }
 
-  function toggleExercise(dateKey, exId) {
+  function toggleExercise(dayKey, dateKey, exId) {
     const day = state.completions[dateKey] || (state.completions[dateKey] = {});
-    if (day[exId]) delete day[exId]; else day[exId] = true;
+    const nowDone = !day[exId];
+    if (nowDone) day[exId] = true; else delete day[exId];
     if (Object.keys(day).length === 0) delete state.completions[dateKey];
     saveState();
     render();
+    if (nowDone && state.routine[dayKey].every(e => isDone(dateKey, e.id))) celebrate();
   }
+
+  const celebrateEl = document.getElementById("celebrate");
+  const heartsEl = document.getElementById("hearts");
+
+  function celebrate() {
+    heartsEl.innerHTML = "";
+    const emojis = ["❤️", "💕", "💖", "💗", "💜"];
+    for (let i = 0; i < 18; i++) {
+      const h = document.createElement("span");
+      h.textContent = emojis[i % emojis.length];
+      h.style.left = Math.random() * 95 + "%";
+      h.style.fontSize = 1.2 + Math.random() * 1.6 + "rem";
+      h.style.animationDuration = 3 + Math.random() * 3 + "s";
+      h.style.animationDelay = Math.random() * 1.5 + "s";
+      heartsEl.appendChild(h);
+    }
+    celebrateEl.classList.add("open");
+  }
+
+  document.getElementById("celebrateClose").addEventListener("click", () => celebrateEl.classList.remove("open"));
 
   function getWeight(dateKey, exId) {
     return (state.weights[dateKey] && state.weights[dateKey][exId]) || "";
@@ -363,7 +385,7 @@
     check.className = "exercise-check" + (done ? " checked" : "");
     check.textContent = done ? "✓" : "";
     check.setAttribute("aria-label", done ? "Desmarcar" : "Marcar como hecho");
-    check.addEventListener("click", () => toggleExercise(dateKey, e.id));
+    check.addEventListener("click", () => toggleExercise(dayKey, dateKey, e.id));
     li.appendChild(check);
 
     const thumb = document.createElement("button");
