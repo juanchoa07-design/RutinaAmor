@@ -1,0 +1,5 @@
+services:
+  rutina:
+    build: .
+    ports:
+      - "8080:80"
